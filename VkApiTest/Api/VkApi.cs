@@ -1,33 +1,35 @@
 ﻿using System;
 using RestSharp;
+using VkApiTest.Util;
 
 namespace VkApiTest.Api
 {
     public class VkApi
     {
-        public RestClient Client;
+        public RestClient Client { get; set; }
         public string ClientId { get; set; }
         public string ClientSecret { get; set; }
 
         public VkApi()
         {
-            Client = new RestClient();
-            Client.BaseUrl = new Uri("https://api.vk.com/method/");
+            Client = new RestClient
+            {
+                BaseUrl = new Uri(Configuration.Get("url"))
+            };
         }
 
-        public IRestRequest CreateRequest(String Resource)
+        public IRestResponse<T> Execute<T>(VkMethods method, Object requestBody) where T : new()
         {
-            return new RestRequest { Resource = Resource }
+            IRestRequest req = new RestRequest { Resource = EnumUtils.GetEnumDescription(method) }
                 .AddParameter("client_id", this.ClientId)
-                .AddParameter("client_secret", this.ClientSecret);
+                .AddParameter("client_secret", this.ClientSecret)
+                .AddObject(requestBody);
+            
+            IRestResponse<T> res = this.Client.Execute<T>(req);
+            Console.WriteLine(res.Content);
+            return res;
         }
 
-        public SignupResponse Signup(SignupRequest RequestBody) {
-            var req = this.CreateRequest("auth.signup");
-            req.AddObject(RequestBody);
-            var res = this.Client.Execute<SignupResponse>(req);
-            Console.WriteLine(res.Content);
-            return res.Data;
-        }
+        public IRestResponse<SignupResponse> Signup(SignupRequest requestBody) => Execute<SignupResponse>(VkMethods.Signup, requestBody);
     }
 }

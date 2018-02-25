@@ -1,0 +1,11 @@
+﻿{
+  "dev": {
+    "url": "https://dev.api.vk.com/method/",
+    "clients": {
+      "client1": {
+        "client_id": "***",
+        "client_secret": "***"
+      }
+    }
+  }
+}
